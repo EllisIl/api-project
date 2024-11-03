@@ -11,6 +11,10 @@ const itemSchema = Joi.object({
   createdAt: Joi.date().default(Date.now)
 });
 
+/**
+ * GET /items
+ * Retrieve all items from the database.
+ */
 const getAll = async (req, res) => {
   try {
     const result = await mongodb.getDb().db().collection('items').find();
@@ -21,6 +25,10 @@ const getAll = async (req, res) => {
   }
 };
 
+/**
+ * GET /items/:id
+ * Retrieve a single item by its ID.
+ */
 const getSingle = async (req, res) => {
   try {
     const itemId = new ObjectId(req.params.id);
@@ -35,6 +43,10 @@ const getSingle = async (req, res) => {
   }
 };
 
+/**
+ * POST /items
+ * Create a new item in the database.
+ */
 const createItem = async (req, res) => {
   try {
     // Validate request body
@@ -54,6 +66,10 @@ const createItem = async (req, res) => {
   }
 };
 
+/**
+ * PUT /items/:id
+ * Update an existing item by its ID.
+ */
 const updateItem = async (req, res) => {
   try {
     const itemId = new ObjectId(req.params.id);
@@ -75,6 +91,10 @@ const updateItem = async (req, res) => {
   }
 };
 
+/**
+ * DELETE /items/:id
+ * Delete an item by its ID.
+ */
 const deleteItem = async (req, res) => {
   try {
     const itemId = new ObjectId(req.params.id);
