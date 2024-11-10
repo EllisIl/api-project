@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const passport = require('passport');
 const mongodb = require('./db/connect');
 const dotenv = require('dotenv');
+const session = require('express-session');
 const authRoutes = require('./routes/auth'); // Route for OAuth
 const itemRoutes = require('./routes/items'); // Your main API routes
 const swaggerUi = require('swagger-ui-express');
@@ -18,8 +19,20 @@ const app = express();
 require('./config/passport'); // Assuming you created this in /config as shown previously
 
 app
+  // Body parser for JSON requests
   .use(bodyParser.json())
-  .use(passport.initialize()) // Initialize Passport middleware
+  
+  // Add express-session before passport
+  .use(session({
+    secret: process.env.SESSION_SECRET || 'your_secret_key', // Use a secure secret for production
+    resave: false, // Prevent resaving unmodified sessions
+    saveUninitialized: false, // Don’t save uninitialized sessions
+  }))
+  
+  // Initialize Passport and enable persistent login sessions
+  .use(passport.initialize())
+  .use(passport.session()) // This is needed for persistent login sessions
+  
   .use((req, res, next) => {
     // Allow CORS for all domains (or restrict to specific domains if needed)
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -28,7 +41,7 @@ app
     next();
   })
   .use('/auth', authRoutes) // OAuth routes
-  .use('/api/items', itemRoutes) // Protected API routes
+  .use('/items', itemRoutes) // Protected API routes
   .use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)) // Swagger documentation
   .use('/', (req, res) => {
     res.status(404).json({ message: "Route not found" });
@@ -40,7 +53,7 @@ mongodb.initDb((err) => {
     console.log(err);
   } else {
     app.listen(port, () => {
-      console.log(`Connected to DB and listening on ${port}`);
+      console.log(`App is live at http://localhost:${port}/api-docs`);
     });
   }
 });
